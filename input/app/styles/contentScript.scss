@@ -1,0 +1,21 @@
+@import '../../node_modules/jquery-contextmenu/src/sass/jquery.contextMenu';
+@import '../../node_modules/components-jqueryui/themes/base/jquery-ui';
+PVSCL:IFCOND( Autofill, LINE )
+@import '../../node_modules/awesomplete/awesomplete';
+PVSCL:ENDCOND
+
+PVSCL:IFCOND( Manual, LINE )
+@import './groupSelection';
+PVSCL:ENDCOND
+PVSCL:IFCOND( PreviousAssignments, LINE )
+@import './exam';
+PVSCL:ENDCOND
+@import './tagWrapper';
+@import './locationManager';
+@import './sidebar';
+@import './slrDataExtraction';
+@import 'toolset';
+@import 'userFilter';
+@import './textAnnotator';
+@import './reviewAssistant';
+@import './reviewCanvas';

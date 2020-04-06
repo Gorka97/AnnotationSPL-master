@@ -1,0 +1,116 @@
+{
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
+  "description": "__MSG_appDescription__",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "default_locale": "en",
+  "icons": {
+    "256": "images/icon-512.png"
+  },
+  "background": {
+    "scripts": [
+      "scripts/background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"PVSCL:IFCOND(URN), "file:///*/*"PVSCL:ENDCOND],
+      // PVSCL:IFCOND(GSheetProvider,LINE)
+      "exclude_matches": ["https://docs.google.com/spreadsheets/d/*", "https://docs.google.com/spreadsheets/u/0/d/*"PVSCL:IFCOND(Manual and Hypothesis), "https://hypothes.is/login"PVSCL:ENDCOND],
+      // PVSCL:ELSECOND
+      // PVSCL:IFCOND(Manual and Hypothesis and NOT (MoodleProvider),LINE)
+      "exclude_matches": ["https://hypothes.is/login"],
+      // PVSCL:ENDCOND
+      //PVSCL:ENDCOND
+      // PVSCL:IFCOND(MoodleProvider,LINE)
+      "exclude_matches": ["*://*/*grade/grading/*", "*://*/*mod/assign/view.php*", "*://*/*course/modedit.php?add=assign*"PVSCL:IFCOND(Manual and Hypothesis), "https://hypothes.is/login"PVSCL:ENDCOND],
+      //PVSCL:ENDCOND
+      "js": ["scripts/contentScript.js"],
+      "css": ["styles/contentScript.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    }PVSCL:IFCOND(GSheetProvider),
+    {
+      "matches": ["https://docs.google.com/spreadsheets/d/*", "https://docs.google.com/spreadsheets/u/0/d/*"],
+      "js": ["scripts/googleSheetsContentScript.js"],
+      "run_at": "document_end"
+    }PVSCL:ENDCONDPVSCL:IFCOND(ACM),
+    {
+      "matches": ["*://dl.acm.org/citation.cfm?*"],
+      "js": ["scripts/acmContentScript.js"],
+      "run_at": "document_end"
+    }PVSCL:ENDCONDPVSCL:IFCOND(ScienceDirect),
+    {
+      "matches": ["*://www.sciencedirect.com/science/article/pii/*"],
+      "js": ["scripts/scienceDirectContentScript.js"],
+      "run_at": "document_end"
+    }PVSCL:ENDCONDPVSCL:IFCOND(Springer),
+    {
+      "matches": ["*://link.springer.com/*"],
+      "js": ["scripts/springerContentScript.js"],
+      "run_at": "document_end"
+    }PVSCL:ENDCONDPVSCL:IFCOND(Manual and Hypothesis and Storage->pv:SelectedChildren()->pv:Size()=1),
+    {
+      "matches": [
+        "https://hypothes.is/groups/*/*"
+      ],
+      "js": [
+        "scripts/hypothesisGroupContentScript.js"
+      ],
+      "run_at": "document_end"
+    }PVSCL:ENDCONDPVSCL:IFCOND(MoodleProvider),
+    {
+      "matches": ["*://*/*grade/grading/*", "*://*/*mod/assign/view.php*"],
+      "js": ["scripts/moodleContentScript.js"],
+      "run_at": "document_end"
+    }, {
+      "matches": ["*://*/*course/modedit.php?add=assign*"],
+      "js": ["scripts/moodleAssignmentAddContentScript.js"],
+      "run_at": "document_end"
+    }PVSCL:ENDCOND
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "page_action": {
+    "default_icon": "images/icon-38-bw.png",
+    "default_title": "__MSG_browserActionTitle__"
+  },
+  "options_page": "pages/options.html",
+  "options_ui": {
+    "page": "pages/options.html",
+    "chrome_style": false,
+    "open_in_tab": true
+  },
+  "permissions": [
+    "https://hypothes.is/",
+    "storage",
+    "tabs"PVSCL:IFCOND(URN),
+    "file://*/*"PVSCL:ENDCONDPVSCL:IFCOND(URL),
+    "contextMenus",
+    "downloads",
+    "identity",
+    "notifications",
+    "webRequest",
+    "webRequestBlocking"PVSCL:ENDCONDPVSCL:IFCOND(DOI),
+    "*://doi.org/*",
+    "*://dx.doi.org/*"PVSCL:ENDCONDPVSCL:IFCOND(ScienceDirect),
+    "*://www.sciencedirect.com/science/article/pii/*"PVSCL:ENDCONDPVSCL:IFCOND(Dropbox),
+    "*://www.dropbox.com/s/",
+    "*://*.dropboxusercontent.com/*"PVSCL:ENDCOND
+  ],
+  PVSCL:IFCOND(GSheetProvider or GSheetConsumer, LINE)
+  "oauth2": {
+  	PVSCL:IFCOND(GSheetProvider, LINE)
+    "client_id": "PVSCL:EVAL(GSheetProvider->pv:Attribute('clientId'))",
+    PVSCL:ELSEIFCOND(GSheetConsumer and not(GSheetProvider))
+    "client_id": "PVSCL:EVAL(GSheetConsumer->pv:Attribute('clientId'))",
+    PVSCL:ENDCOND
+    "scopes": [
+      "https://www.googleapis.com/auth/spreadsheets"
+    ]
+  },
+  PVSCL:ENDCOND
+  "web_accessible_resources": ["pages/*.html", "content/*", "images/*"]PVSCL:IFCOND(WebAnnotator.WebAnnotator->pv:Attribute('key')<>''),
+  "key": "PVSCL:EVAL(WebAnnotator.WebAnnotator->pv:Attribute('key'))"
+  PVSCL:ENDCOND
+}
